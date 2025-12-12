@@ -1,0 +1,3 @@
+Akurasi: 0.6832
+AUC: 0.7565
+Best C: 100
