@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SVR Prediction</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #0f0f0f;
+      color: #fff;
+      padding: 40px;
+    }
+
+    .container {
+      max-width: 650px;
+      margin: auto;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid #1db954;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(29,185,84,0.4);
+      backdrop-filter: blur(6px);
+      animation: fadeIn 0.6s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+      text-align: center;
+      color: #1db954;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: 1px solid #1db954;
+      background: #0b0b0b;
+      color: #fff;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: #1db954;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .btn:hover {
+      background: #17a847;
+      box-shadow: 0 0 12px #1db954;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Prediksi Model SVR</h2>
+
+    <label>Input Cepat (pisahkan dengan koma atau spasi)</label>
+    <input type="text" id="quickInput" placeholder="Contoh: 0.2 0.7 212000 0.85 0.0 5 0.1 -6.2 1 0.05 120 4 0.8" />
+
+    <button type="button" class="btn" onclick="fillFields()">Isi Kolom</button>
+
+    <script>
+      function fillFields() {
+        const raw = document.getElementById('quickInput').value.trim();
+        const values = raw.split(/[, ]+/);
+        const fields = document.querySelectorAll('.input-field');
+        fields.forEach((field, i) => {
+          field.value = values[i] || '';
+        });
+      }
+    </script>
+
+    <form style="margin-top: 25px;">
+
+      <label>Acousticness</label>
+      <input class="input-field" type="number" step="any">
+
+      <label>Danceability</label>
+      <input class="input-field" type="number" step="any">
+
+      <label>Duration (ms)</label>
+      <input class="input-field" type="number" step="any">
+
+      <label>Energy</label>
+      <input class="input-field" type="number" step="any">
+
+      <label>Instrumentalness</label>
+      <input class="input-field" type="number" step="any">
+
+      <label>Key</label>
+      <input class="input-field" type="number">
+
+      <label>Liveness</label>
+      <input class="input-field" type="number" step="any">
+
+      <label>Loudness</label>
+      <input class="input-field" type="number" step="any">
+
+      <label>Mode</label>
+      <input class="input-field" type="number">
+
+      <label>Speechiness</label>
+      <input class="input-field" type="number" step="any">
+
+      <label>Tempo</label>
+      <input class="input-field" type="number" step="any">
+
+      <label>Time Signature</label>
+      <input class="input-field" type="number">
+
+      <label>Valence</label>
+      <input class="input-field" type="number" step="any">
+
+      <button class="btn" type="button">Prediksi</button>
+
+    </form>
+
+  </div>
+
+</body>
+</html>

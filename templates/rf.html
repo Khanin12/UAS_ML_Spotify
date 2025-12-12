@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediksi Spotify dengan Random Forest</title>
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #121212;
+            color: #fff;
+            margin: 0;
+            padding: 40px;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 5px;
+            color: #1DB954;
+        }
+
+        p {
+            margin-top: 0;
+            color: #ccc;
+        }
+
+        .quick-input-box {
+            background: #1a1a1a;
+            border: 2px solid #1DB954;
+            padding: 20px;
+            border-radius: 14px;
+            margin-top: 25px;
+        }
+
+        .quick-input-box input {
+            width: 80%;
+            padding: 13px;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+            font-size: 15px;
+        }
+
+        .btn {
+            background: #1DB954;
+            color: #121212;
+            padding: 13px 25px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .grid {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 22px;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            font-size: 15px;
+            color: #1DB954;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px;
+            margin-top: 6px;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+            background: #1a1a1a;
+            color: white;
+            font-size: 15px;
+        }
+
+        .submit-btn {
+            margin-top: 35px;
+            background: #1DB954;
+            color: #121212;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <h1>Prediksi Lagu Spotify dengan Random Forest</h1>
+    <p>Masukkan fitur musik untuk memprediksi karakteristik lagu menggunakan model Random Forest.</p>
+
+    <!-- Quick Input -->
+    <div class="quick-input-box">
+        <label>Input Cepat (pisahkan dengan koma atau spasi)</label><br><br>
+
+        <input id="quickInput" placeholder="Contoh: 0.2, 0.7, 212000, 0.85, 0.0, 5, 0.1, -6.2, 1, 0.05, 120, 4, 0.8, 1">
+        <button class="btn" onclick="fillFields()">Isi Kolom</button>
+
+        <p style="font-size: 13px; margin-top: 10px; color: #aaa;">
+            Urutan: Acousticness, Danceability, Duration_ms, Energy, Instrumentalness, Key, Liveness, Loudness,
+            Mode, Speechiness, Tempo, Time_signature, Valence, Target
+        </p>
+    </div>
+
+    <!-- Form -->
+    <form action="/predict_rf" method="POST">
+        <div class="grid">
+
+            <div class="input-group">
+                <label>Acousticness</label>
+                <input name="acousticness">
+            </div>
+
+            <div class="input-group">
+                <label>Danceability</label>
+                <input name="danceability">
+            </div>
+
+            <div class="input-group">
+                <label>Duration (ms)</label>
+                <input name="duration_ms">
+            </div>
+
+            <div class="input-group">
+                <label>Energy</label>
+                <input name="energy">
+            </div>
+
+            <div class="input-group">
+                <label>Instrumentalness</label>
+                <input name="instrumentalness">
+            </div>
+
+            <div class="input-group">
+                <label>Key</label>
+                <input name="key">
+            </div>
+
+            <div class="input-group">
+                <label>Liveness</label>
+                <input name="liveness">
+            </div>
+
+            <div class="input-group">
+                <label>Loudness</label>
+                <input name="loudness">
+            </div>
+
+            <div class="input-group">
+                <label>Mode</label>
+                <input name="mode">
+            </div>
+
+            <div class="input-group">
+                <label>Speechiness</label>
+                <input name="speechiness">
+            </div>
+
+            <div class="input-group">
+                <label>Tempo</label>
+                <input name="tempo">
+            </div>
+
+            <div class="input-group">
+                <label>Time Signature</label>
+                <input name="time_signature">
+            </div>
+
+            <div class="input-group">
+                <label>Valence</label>
+                <input name="valence">
+            </div>
+
+            <div class="input-group">
+                <label>Target</label>
+                <input name="target">
+            </div>
+
+        </div>
+
+        <button class="submit-btn" type="submit">Prediksi Sekarang</button>
+    </form>
+
+    <script>
+        function fillFields() {
+            let values = document.getElementById("quickInput").value
+                .split(/[, ]+/)
+                .filter(v => v.trim() !== "");
+
+            let inputs = document.querySelectorAll("input[name]");
+
+            inputs.forEach((input, i) => {
+                if (values[i] !== undefined) input.value = values[i];
+            });
+        }
+    </script>
+
+</body>
+</html>

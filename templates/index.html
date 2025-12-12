@@ -1,15 +1,623 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spotify Model Home</title>
+  <!-- Perbaiki: hapus spasi di akhir URL -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #0f0f0f;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Animated Background */
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(circle at 20% 50%, rgba(29, 185, 84, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(29, 185, 84, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(29, 185, 84, 0.1) 0%, transparent 50%);
+      z-index: -1;
+      animation: backgroundShift 20s ease-in-out infinite;
+    }
+
+    @keyframes backgroundShift {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(-20px, -20px) scale(1.05); }
+    }
+
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: -1;
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: rgba(29, 185, 84, 0.5);
+      border-radius: 50%;
+      box-shadow: 0 0 10px 2px rgba(29, 185, 84, 0.2);
+      animation: floatUp 15s infinite linear;
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(-100vh) translateX(100px); opacity: 0; }
+    }
+
+    /* Navbar */
+    .navbar {
+      height: 70px;
+      background: rgba(15, 15, 15, 0.8);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 30px;
+      z-index: 100;
+      position: relative;
+    }
+
+    .navbar-left {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .navbar-logo {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1db954;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      white-space: nowrap;
+    }
+
+    .navbar-logo i {
+      font-size: 32px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    .search-container {
+      position: relative;
+      width: 300px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px 45px 12px 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 25px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .search-input:focus {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(29, 185, 84, 0.5);
+      box-shadow: 0 0 10px rgba(29, 185, 84, 0.2);
+    }
+
+    .search-input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .sidebar-toggle {
+      width: 45px;
+      height: 45px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar-toggle:hover {
+      background: rgba(29, 185, 84, 0.2);
+      border-color: rgba(29, 185, 84, 0.4);
+      box-shadow: 0 0 10px rgba(29, 185, 84, 0.3);
+    }
+
+    .sidebar-toggle span {
+      width: 22px;
+      height: 2.5px;
+      background: #fff;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    /* Animasi toggle hanya aktif saat sidebar terbuka */
+    .main-container.collapsed .sidebar-toggle span:nth-child(1) {
+      transform: rotate(0) translate(0, 0);
+    }
+
+    .main-container.collapsed .sidebar-toggle span:nth-child(2) {
+      opacity: 1;
+    }
+
+    .main-container.collapsed .sidebar-toggle span:nth-child(3) {
+      transform: rotate(0) translate(0, 0);
+    }
+
+    .main-container:not(.collapsed) .sidebar-toggle span:nth-child(1) {
+      transform: rotate(45deg) translate(4px, 4px);
+    }
+
+    .main-container:not(.collapsed) .sidebar-toggle span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .main-container:not(.collapsed) .sidebar-toggle span:nth-child(3) {
+      transform: rotate(-45deg) translate(4px, -4px);
+    }
+
+    /* Main Layout */
+    .main-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      transition: padding 0.3s ease;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: rgba(15, 15, 15, 0.85);
+      backdrop-filter: blur(20px);
+      padding: 30px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 90;
+      transition: transform 0.3s ease;
+    }
+
+    .main-container.collapsed .sidebar {
+      transform: translateX(-100%);
+    }
+
+    .content {
+      flex: 1;
+      padding: 60px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .main-container.collapsed .content {
+      padding: 60px 60px 60px 40px;
+    }
+
+    /* Sidebar Items - tanpa judul "Menu" */
+    .nav-item {
+      padding: 16px 20px;
+      text-decoration: none;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: relative;
+      overflow: hidden;
+      font-size: 16px;
+    }
+
+    .nav-item i {
+      font-size: 22px;
+      color: #1db954;
+      min-width: 22px;
+      text-align: center;
+    }
+
+    .nav-item::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(29, 185, 84, 0.25), transparent);
+      transition: left 0.5s;
+    }
+
+    .nav-item:hover::before {
+      left: 100%;
+    }
+
+    .nav-item:hover {
+      background: rgba(29, 185, 84, 0.15);
+      border-color: rgba(29, 185, 84, 0.5);
+      transform: translateX(4px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    /* --- Sisanya tetap sama --- */
+    .header { margin-bottom: 10px; }
+    .title {
+      font-size: 48px;
+      color: #1db954;
+      margin-bottom: 15px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      display: inline-block;
+      position: relative;
+    }
+    .title::after {
+      content: "";
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 100px;
+      height: 4px;
+      background: linear-gradient(90deg, #1db954, transparent);
+      border-radius: 2px;
+    }
+    .desc {
+      font-size: 20px;
+      color: #ccc;
+      max-width: 700px;
+      line-height: 1.6;
+    }
+
+    .hero-box {
+      padding: 50px;
+      padding-top: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      animation: float 6s ease-in-out infinite;
+      position: relative;
+      overflow: hidden;
+      margin-top: 3rem;
+    }
+
+    .hero-box::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(29, 185, 84, 0.1) 0%, transparent 70%);
+      animation: rotate 20s linear infinite;
+      z-index: 0;
+    }
+
+    .hero-title {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #1db954;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-text {
+      font-size: 18px;
+      line-height: 1.6;
+      color: #e4e4e4;
+      position: relative;
+      z-index: 1;
+    }
+
+    .feature-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      margin-top: 30px;
+    }
+
+    .feature-card {
+      padding: 25px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      background: rgba(29, 185, 84, 0.1);
+      border-color: rgba(29, 185, 84, 0.3);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .feature-icon {
+      font-size: 36px;
+      color: #1db954;
+    }
+
+    .feature-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .feature-desc {
+      font-size: 15px;
+      color: #ccc;
+      line-height: 1.5;
+    }
+
+    .cta-button {
+      display: inline-block;
+      padding: 15px 30px;
+      background: linear-gradient(135deg, #1db954, #1aa34a);
+      color: white;
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 600;
+      margin-top: 20px;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(29, 185, 84, 0.3);
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .cta-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(29, 185, 84, 0.4);
+    }
+
+    .stats-container {
+      display: flex;
+      gap: 30px;
+      margin-top: 30px;
+    }
+
+    .stat-item {
+      flex: 1;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #1db954;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: #ccc;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(29, 185, 84, 0.5);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(29, 185, 84, 0.7);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .navbar { padding: 0 15px; }
+      .search-container { width: 180px; }
+      .sidebar {
+        position: fixed;
+        top: 70px;
+        left: 0;
+        height: calc(100vh - 70px);
+        transform: translateX(-100%);
+        z-index: 1000;
+      }
+      .main-container.collapsed .sidebar {
+        transform: translateX(0);
+      }
+      .content {
+        padding: 30px;
+      }
+      .main-container.collapsed .content {
+        padding: 30px;
+      }
+      .title { font-size: 32px; }
+      .feature-cards { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-    <h1>halaman dashboard</h1>
-    <h1>halaman dashboard</h1>
-    <h1>halaman dashboard</h1>
-    <h1>halaman dashboard</h1>
-    <h1>halaman dashboard</h1>
+  <div class="particles" id="particles"></div>
+
+  <nav class="navbar">
+    <div class="navbar-left">
+      <div class="sidebar-toggle" id="sidebarToggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <div class="navbar-logo">
+        <i class="fab fa-spotify"></i>
+        <span>Spotify ML</span>
+      </div>
+    </div>
+    <div class="navbar-right">
+      <div class="search-container">
+        <input type="text" class="search-input" placeholder="Cari lagu atau artis..." />
+        <i class="fas fa-search search-icon"></i>
+      </div>
+    </div>
+  </nav>
+
+  <div class="main-container" id="mainContainer">
+    <div class="sidebar" id="sidebar">
+      <!-- Judul "Menu" dihapus -->
+      <a href="random_f.html" class="nav-item">
+        <i class="fas fa-leaf"></i>
+        <span>Prediksi Random Forest</span>
+      </a>
+      <a href="svr.html" class="nav-item">
+        <i class="fas fa-wave-square"></i>
+        <span>Prediksi SVR</span>
+      </a>
+    </div>
+
+    <div class="content">
+      <div class="header">
+        <h1 class="title">Selamat Datang!</h1>
+        <p class="desc">
+          Website ini menggunakan Machine Learning untuk menganalisis fitur lagu Spotify dan memprediksi nilai tertentu
+          menggunakan dua model: <b>Random Forest</b> dan <b>Support Vector Regression (SVR)</b>.
+          Pilih model pada menu di samping untuk mulai melakukan prediksi.
+        </p>
+      </div>
+
+      <div class="hero-box">
+        <div class="hero-title">
+          <i class="fas fa-fire"></i>
+          Analisis Lagu Spotify Lebih Mudah
+        </div>
+        <p class="hero-text">
+          Masukkan fitur lagu seperti acousticness, danceability, energy, tempo, dan lainnya. Model akan memprediksi
+          karakteristik atau popularitas lagu berdasarkan dataset Spotify.
+          <br /><br />
+          Klik salah satu model di sidebar untuk memulai.
+        </p>
+        <a href="#" class="cta-button">Pelajari Lebih Lanjut</a>
+      </div>
+
+      <div class="feature-cards">
+        <div class="feature-card">
+          <i class="fas fa-brain feature-icon"></i>
+          <h3 class="feature-title">Machine Learning</h3>
+          <p class="feature-desc">Teknologi AI canggih untuk menganalisis pola dalam data musik dan memberikan prediksi akurat.</p>
+        </div>
+        <div class="feature-card">
+          <i class="fas fa-chart-bar feature-icon"></i>
+          <h3 class="feature-title">Analisis Mendalam</h3>
+          <p class="feature-desc">Pemahaman komprehensif tentang fitur musik seperti energi, danceability, dan valence.</p>
+        </div>
+        <div class="feature-card">
+          <i class="fas fa-music feature-icon"></i>
+          <h3 class="feature-title">Data Spotify</h3>
+          <p class="feature-desc">Akses ke database lagu Spotify yang luas untuk melatih model dengan data berkualitas tinggi.</p>
+        </div>
+      </div>
+
+      <div class="stats-container">
+        <div class="stat-item">
+          <div class="stat-value">2k++</div>
+          <div class="stat-label">Lagu Dianalisis</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">2</div>
+          <div class="stat-label">Model ML</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Particles
+    const particlesContainer = document.getElementById('particles');
+    for (let i = 0; i < 50; i++) {
+      const p = document.createElement('div');
+      p.classList.add('particle');
+      p.style.left = `${Math.random() * 100}%`;
+      const s = Math.random() * 3 + 1;
+      p.style.width = p.style.height = `${s}px`;
+      p.style.animationDelay = `${Math.random() * 15}s`;
+      p.style.animationDuration = `${Math.random() * 10 + 15}s`;
+      particlesContainer.appendChild(p);
+    }
+
+    // Toggle Sidebar — KINI BENAR
+    const toggle = document.getElementById('sidebarToggle');
+    const container = document.getElementById('mainContainer');
+
+    toggle.addEventListener('click', () => {
+      container.classList.toggle('collapsed');
+    });
+
+    // Close on outside click (mobile)
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth <= 768 && container.classList.contains('collapsed')) {
+        const sidebar = document.getElementById('sidebar');
+        if (!sidebar.contains(e.target) && !toggle.contains(e.target)) {
+          container.classList.remove('collapsed');
+        }
+      }
+    });
+  </script>
 </body>
 </html>
