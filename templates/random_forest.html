@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name=".viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Forest - Prediksi Emosi Spotify</title>
+  <link rel="stylesheet" href="../static/css/rf.css">
+    <style>
+        
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🌲 Random Forest — Prediksi Emosi Lagu</h1>
+        <p class="subtitle">
+            Masukkan fitur musik untuk memprediksi apakah emosinya <strong>Positif</strong> (ceria) atau
+            <strong>Netral</strong> (sedih/tenang).
+            <span class="model-tag">Model: Random Forest</span>
+        </p>
+
+        <!-- Quick Input -->
+        <div class="quick-input-box">
+            <label>Input Cepat (pisahkan dengan koma atau spasi)</label>
+            <input 
+                id="quickInput" 
+                placeholder="Contoh: 0.2, 0.7, 212000, 0.85, 0.0, 5, 0.1, -6.2, 1, 0.05, 120, 4"
+            >
+            <div class="btn-row">
+                <button class="btn" onclick="fillFields()">Isi Kolom Otomatis</button>
+            </div>
+            <div class="feature-order">
+                Urutan fitur: {{ ', '.join(features) }}
+            </div>
+        </div>
+
+        <!-- Form -->
+        <form action="/predict_rf" method="POST">
+            <div class="grid">
+                {% for feat in features %}
+                <div class="input-group">
+                    <label>{{ feat.replace('_', ' ').title() }}</label>
+                    <input 
+                        type="number" 
+                        step="any" 
+                        name="{{ feat }}" 
+                        required
+                        value="{{ input_data.get(feat, '') if input_data else '' }}"
+                    >
+                </div>
+                {% endfor %}
+            </div>
+
+            <button class="submit-btn" type="submit">🔍 Prediksi dengan Random Forest</button>
+        </form>
+
+        <!-- Hasil -->
+        {% if prediction %}
+        <div class="result-box">
+            <p>🎯 <strong>Hasil Prediksi:</strong> Emosi lagu ini <strong>{{ prediction }}</strong> 
+               (Target: <code>{{ target }}</code>)</p>
+            <p>📊 Probabilitas Emosi Positif: <strong>{{ confidence }}</strong></p>
+        </div>
+        {% endif %}
+
+        <!-- Error -->
+        {% if error %}
+        <div class="error-box">
+            ❌ Terjadi kesalahan: {{ error }}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Data fitur untuk JavaScript -->
+    <script id="features-data" type="application/json">
+        {{ features | tojson }}
+    </script>
+
+    <script>
+        function fillFields() {
+            const inputStr = document.getElementById("quickInput").value.trim();
+            if (!inputStr) {
+                alert("Silakan masukkan nilai terlebih dahulu.");
+                return;
+            }
+
+            const values = inputStr.split(/[, ]+/).filter(v => v !== '');
+            const features = JSON.parse(document.getElementById('features-data').textContent);
+            const expectedCount = features.length;
+
+            if (values.length < expectedCount) {
+                alert(`Jumlah nilai kurang. Dibutuhkan ${expectedCount} nilai.`);
+                return;
+            }
+
+            features.forEach((name, i) => {
+                const el = document.querySelector(`input[name="${name}"]`);
+                if (el) el.value = values[i];
+            });
+        }
+    </script>
+
+</body>
+
+</html>

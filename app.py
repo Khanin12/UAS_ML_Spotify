@@ -5,85 +5,88 @@ import pickle
 
 app = Flask(__name__)
 
-# === Muat artefak dari training ===
+# === Muat model Logistic Regression ===
 with open('logistic_model.pkl', 'rb') as f:
-    model = pickle.load(f)
+    lr_model = pickle.load(f)
 
-with open('feature_columns.pkl', 'rb') as f:
+# === Muat model Random Forest ===
+with open('model_random_forest.pkl', 'rb') as f:
+    rf_model = pickle.load(f)
+
+# Muat daftar fitur (sekarang SAMA untuk kedua model)
+with open('lr_feature_columns.pkl', 'rb') as f:
     feature_columns = pickle.load(f)
 
-# Fitur input dasar dari form HTML (sesuai dataset asli)
-base_features = [
-    'acousticness', 'danceability', 'duration_ms', 'energy',
-    'instrumentalness', 'key', 'liveness', 'loudness',
-    'mode', 'speechiness', 'tempo', 'time_signature'
-]
+# Gunakan daftar fitur yang sama untuk kedua model
+base_features = feature_columns
 
 @app.route('/')
 def home():
     return render_template('index.html')
 
+# Halaman Logistic Regression
+@app.route('/logistic')
+def logistic_page():
+    return render_template('logistic.html', features=base_features)
+
+# Halaman Random Forest
 @app.route('/randomforest')
 def rf_page():
-    return render_template('rf.html', features=base_features)
+    return render_template('random_forest.html', features=base_features)
 
-@app.route('/predict', methods=['POST'])
-def predict():
+# Prediksi untuk Logistic Regression (versi sederhana)
+@app.route('/predict_lr', methods=['POST'])
+def predict_lr():
     try:
-        # === 1. Ambil input dari form sebagai float ===
-        data = {}
-        for feat in base_features:
-            val = request.form[feat]
-            data[feat] = float(val)  # Pastikan float (konsisten dengan training)
-
+        # Ambil input (12 fitur dasar)
+        data = {feat: float(request.form[feat]) for feat in base_features}
         df = pd.DataFrame([data])
 
-        # === 2. Rekayasa fitur identik dengan training ===
-        df = pd.get_dummies(
-            df,
-            columns=['key', 'time_signature'],
-            prefix=['key', 'ts'],
-            drop_first=True
-        )
+        # TIDAK ADA one-hot, TIDAK ADA fitur interaksi — langsung prediksi
+        df = df[base_features]
 
-        # Tambahkan fitur interaksi
-        df['mode_x_energy'] = df['mode'] * df['energy']
-        df['mode_x_danceability'] = df['mode'] * df['danceability']
-        df['energy_x_acousticness'] = df['energy'] * df['acousticness']
-
-        # === 3. Alignment fitur ===
-        for col in feature_columns:
-            if col not in df.columns:
-                df[col] = 0
-        df = df[feature_columns]  # Urutkan sesuai training
-
-        # === 4. Prediksi dengan threshold 60% ===
-        proba = model.predict_proba(df)[0][1]
+        proba = lr_model.predict_proba(df)[0][1]
         threshold = 0.60
+        prediction = "Positif" if proba >= threshold else "Netral"
+        target = 1 if prediction == "Positif" else 0
 
-        if proba >= threshold:
-            prediction_label = "Positif"
-            target = 1
-        else:
-            prediction_label = "Netral"   # ← Ganti dari "Negatif" ke "Netral"
-            target = 0
-
-        # === 5. Kirim semua ke template ===
         return render_template(
-            'rf.html',
+            'logistic.html',
             features=base_features,
-            prediction=prediction_label,
-            target=target,                # ← Tambahkan target (0/1)
+            prediction=prediction,
+            target=target,
             confidence=f"{proba:.2%}",
             input_data=data
         )
-
     except Exception as e:
+        return render_template('logistic.html', features=base_features, error=f"Error: {str(e)}")
+
+# Prediksi untuk Random Forest
+@app.route('/predict_rf', methods=['POST'])
+def predict_rf():
+    try:
+        # Ambil input (12 fitur dasar)
+        data = {feat: float(request.form[feat]) for feat in base_features}
+        df = pd.DataFrame([data])
+
+        # Langsung prediksi
+        df = df[base_features]
+
+        proba = rf_model.predict_proba(df)[0][1]
+        threshold = 0.60
+        prediction = "Positif" if proba >= threshold else "Netral"
+        target = 1 if prediction == "Positif" else 0
+
         return render_template(
-            'rf.html',
+            'random_forest.html',
             features=base_features,
-            error=f"Error: {str(e)}"
+            prediction=prediction,
+            target=target,
+            confidence=f"{proba:.2%}",
+            input_data=data
         )
+    except Exception as e:
+        return render_template('random_forest.html', features=base_features, error=f"Error: {str(e)}")
 
 if __name__ == '__main__':
     app.run(debug=True)
